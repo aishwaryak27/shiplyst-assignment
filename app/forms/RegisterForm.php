@@ -5,6 +5,8 @@ use Phalcon\Forms\Form;
 use Phalcon\Forms\Element\Text;
 use Phalcon\Forms\Element\Password;
 use Phalcon\Forms\Element\Submit;
+use Phalcon\Forms\Element\Select;
+use Phalcon\Forms\Element\Hidden;
 // Validation
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\StringLength;
@@ -13,8 +15,9 @@ use Phalcon\Validation\Validator\Email;
 
 class RegisterForm extends Form
 {
-    public function initialize()
-    {
+    public function initialize($user = NULL)
+    {	
+	$this->showPassowrd = false;
         /**
          * Fname
          */
@@ -51,6 +54,10 @@ class RegisterForm extends Form
             // "required" => true,
             "placeholder" => "Enter Email Address"
         ]);
+	
+	$id = new Hidden('id', [
+            "class" => "form-control"
+        ]);
 
         // form email field validation
         $email->addValidators([
@@ -66,35 +73,54 @@ class RegisterForm extends Form
             // "required" => true,
             "placeholder" => "Your Password"
         ]);
-
-        $password->addValidators([
-            new PresenceOf(['message' => 'Password is required']),
-            new StringLength(['min' => 5, 'message' => 'Password is too short. Minimum 5 characters.']),
-            new Confirmation(['with' => 'password_confirm', 'message' => 'Password doesn\'t match confirmation.']),
-        ]);
+        if(NULL == $user){
+	    
+	    $password->addValidators([
+		new PresenceOf(['message' => 'Password is required']),
+		new StringLength(['min' => 5, 'message' => 'Password is too short. Minimum 5 characters.']),
+		new Confirmation(['with' => 'confirm_password', 'message' => 'Password doesn\'t match confirmation.']),
+	    ]);
+	}
 
 
         /**
          * Confirm Password
          */
-        $passwordNewConfirm = new Password('password_confirm', [
+        $passwordNewConfirm = new Password('confirm_password', [
             "class" => "form-control",
             // "required" => true,
             "placeholder" => "Confirm Password"
         ]);
 
-        $passwordNewConfirm->addValidators([
-            new PresenceOf(['message' => 'The confirmation password is required']),
-        ]);
+        if(NULL == $user){
+	   
+	    $passwordNewConfirm->addValidators([
+		new PresenceOf(['message' => 'The confirmation password is required']),
+	    ]);
+	}
 	
 	/**
          * Gender
          */
-        $gender = new Text('gender', [
-            "class" => "form-control",
+       // $gender = new Text('gender', [
+          //  "class" => "form-control",
             // "required" => true,
-            "placeholder" => "Gender"
-        ]);
+         //   "placeholder" => "Gender"
+      //  ]);
+	$selected_gender = [];
+	if($user){
+	    
+	    $selected_gender = ['value'=>$user->gender];
+	    
+	}
+	
+	$gender = new Select(
+	    'gender', 
+	    [	'' => 'Select One',
+		'f' => 'Female',
+		'm' => 'Male'
+	    ],
+	$selected_gender);
 
         // form email field validation
         $gender->addValidators([
@@ -105,16 +131,25 @@ class RegisterForm extends Form
         /**
          * Submit Button
          */
+	$btn_text = 'Register';
+	if(NULL != $user){
+	    $btn_text = 'Update';
+	}
         $submit = new Submit('submit', [
-            "value" => "Register",
+            "value" => $btn_text,
             "class" => "btn btn-primary",
         ]);
 
         $this->add($fname);
 	$this->add($lname);
         $this->add($email);
+	if(!$user){
+	$this->showPassowrd = true;
         $this->add($password);
         $this->add($passwordNewConfirm);
+	}else{
+	    $this->add($id);
+	}
 	$this->add($gender);
         $this->add($submit);
     }

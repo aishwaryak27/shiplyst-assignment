@@ -18,16 +18,17 @@
             <label for="email">E-Mail</label>
             <?php echo $form->render('email'); ?>
         </div>
-
+		<?php if($form->showPassowrd){ ?>
         <div class="form-group">
             <label for="password">Password</label>
             <?php echo $form->render('password'); ?>
         </div>
 
         <div class="form-group">
-            <label for="password_confirm">Confirm Password</label>
-            <?php echo $form->render('password_confirm'); ?>
+            <label for="confirm_password">Confirm Password</label>
+            <?php echo $form->render('confirm_password'); ?>
         </div>
+		<?php } else { echo $form->render('id'); }?>
     
     <div class="form-group">
             <label for="gender">Gender</label>
@@ -39,5 +40,5 @@
         </div>
 
     </form>
-    <a href="user/view">View Users</a>
+    <a href="http://localhost/assignment/user/view">View Users</a>
 </div>

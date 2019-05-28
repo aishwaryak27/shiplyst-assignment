@@ -1,9 +1,5 @@
 <?php
 
-use Phalcon\Mvc\Model\Validator\Email as Email;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\Uniqueness as Uniqueness;
-
 class User extends \Phalcon\Mvc\Model
 {
 
@@ -208,38 +204,6 @@ class User extends \Phalcon\Mvc\Model
     public function getGender()
     {
         return $this->gender;
-    }
-
-    /**
-     * Validations and business logic
-     */
-    public function validation()
-    {
-
-        $validator = new Validation();
-
-        $validator->add(
-            'email',
-            new EmailValidator(
-                [
-                    'model'   => $this,
-                    'message' => 'Please enter a correct email address',
-                ]
-            )
-        );
-
-        $validator->add(
-            'email',
-            new Uniqueness(
-                [
-                    'model'   => $this,
-                    'message' => 'Another user with same email already exists',
-                    'cancelOnFail' => true,
-                ]
-            )
-        );
-
-        return $this->validate($validator);
     }
 
     /**

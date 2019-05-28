@@ -14,15 +14,25 @@ class UserController extends ControllerBase
         $this->userModel = new User();
     }
 
-    public function indexAction()
-    {
-	$this->tag->setTitle('Phalcon :: Register');
-        $this->view->form = new RegisterForm();
+    public function indexAction($id = NULL)
+    { 
+	if(NULL != $id ){ 
+	    $user = User::findFirst($id);
+	    $this->view->form = new RegisterForm($user);
+	}else{
+	    $this->tag->setTitle('Phalcon :: Register');
+	    $this->view->form = new RegisterForm();
+	}
     }
     
     public function addAction()
-    {
-	$form = new RegisterForm();
+    {	$user = NULL;
+    
+	if($_POST['id']){
+	    $user = User::findFirst($_POST['id']);
+	}
+	
+	$form = new RegisterForm($user);
 
         // check request
         if (!$this->request->isPost()) {
@@ -36,39 +46,38 @@ class UserController extends ControllerBase
                 $this->flashSession->error($message);
                 $this->dispatcher->forward([
                     'controller' => $this->router->getControllerName(),
-                    'action'     => '',
+                    'action'     => "index",
+			'params' =>[$_POST['id']]
                 ]);
                 return;
             }
         }
 
         # Doc :: https://docs.phalconphp.com/en/3.3/security
-        $this->userModel->setPassword($this->security->hash($_POST['password']));
+	if(NULL == $_POST['id']){
+	    $this->userModel->setPassword($this->security->hash($_POST['password']));
+	    $this->userModel->setConfirmPassword($this->security->hash($_POST['password']));
+	}else{
+	    $this->userModel->setPassword($user->getPassword());
+	    $this->userModel->setConfirmPassword($user->getConfirmPassword());
+	}
 
         
         # Doc :: https://docs.phalconphp.com/en/3.3/db-models#create-update-records
-        if (!$this->userModel->save()) {
-            foreach ($this->userModel->getMessages() as $m) {
+	if ( NULL == $_POST['id'] && !$this->userModel->save() || $_POST['id'] && !$this->userModel->update() ) {
+           foreach ($this->userModel->getMessages() as $m) {
                 $this->flashSession->error($m);
                 $this->dispatcher->forward([
                     'controller' => $this->router->getControllerName(),
-                    'action'     => '',
+                    'action'     => "index",
+			'params' =>[$_POST['id']]
                 ]);
                 return;
             }
         }
 
-        /**
-         * Send Email
-         */
-        // $params = [
-        //     'name' => $this->request->getPost('name'),
-        //     'link' => "http://localhost/_Phalcon/demo-app2/signup"
-        // ];
-        // $mail->send($this->request->getPost('email', ['trim', 'email']), 'signup', $params);
-
-        $this->flashSession->success('Thanks for registering!');
-        return $this->response->redirect('user');
+        $this->flashSession->success('Thanks for update!');
+        return $this->response->redirect('user/view');
 
         $this->view->disable();
     }
@@ -77,17 +86,9 @@ class UserController extends ControllerBase
 	// Fetch All User Articles
         $users = User::find();
 	
-	print_r($users);
-
-
-        /**
-         * Send Data in View Template
-         * --------------------------------------------------------
-         * $this->view->articlesdata = "Auth ID";
-         * $this->view->setVars(['articlesdata' => "Auth ID"]);
-         */
-       // $this->view->articlesData = $articles;
+	$this->view->users = $users;
     }
+    
 
 }
 

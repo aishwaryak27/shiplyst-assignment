@@ -1,0 +1,9 @@
+<h2>Users Data
+</h2>
+<table><tr><th>First Name</th><th>Last Name</th><th>Email address </th><th>Gender</th><th>Edit Action</th></tr>
+<?php foreach ($users as $user) {
+        echo "<tr>";
+        echo "<td>" . $user->fname . "</td><td>" . $user->lname . "</td><td>" . $user->email . "</td><td>". $user->gender ."</td><td><a href='index/".$user->id."'>Edit</a></td>";
+        echo "</tr>";
+    }
+?>
